@@ -178,7 +178,7 @@ export default class WalletService {
                         throw new Error("Mainnet wallet needed");
                     }
                     network = "Mainnet";
-                    break; cardano.network.network_id
+                    break;
 
                 default:
                     AlertService.show(["Invalid network"], 'error')
@@ -196,7 +196,6 @@ export default class WalletService {
             this.api = api;
         } catch (e) {
             throw e;
-
         }
     }
 }

@@ -29,7 +29,7 @@ let theme = computed(() => {
         <span class="flex-none rounded-full p-1" :class="[`bg-${theme}-500/20`]">
             <div class="h-1.5 w-1.5 rounded-full" :class="[`bg-${theme}-500`]" />
         </span>
-        <span class="text-xs leading-5 text-gray-300 capitalize">
+        <span class="text-xs leading-5 text-gray-400 capitalize">
             {{ status }}
         </span>
     </span>

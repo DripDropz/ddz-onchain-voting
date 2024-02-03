@@ -41,9 +41,9 @@
                 <div v-if="config.show_created_by">
                     Created with ♡ by <a href="https://dripdropz.io/" target="_blank" >DripDropz</a>
                 </div>
-                <div>
+<!--                <div>
                     Hosted with ♡ by  <a href="https://www.lidonation.com/" target="_blank" >Lidonation</a>
-                </div>
+                </div>-->
             </div>
         </section>
     </footer>

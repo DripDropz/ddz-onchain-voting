@@ -8,15 +8,18 @@ export default class BallotService {
     protected static lucid: Lucid;
 
     static async loadVotingPower(voterId: string, ballotHash: string) {
+        if (!voterId) {
+            return 0
+        }
         try {
             let response = await axios.get(
                 route("voters.power", { voterId, ballot: ballotHash })
             );
             return response.data;
         } catch (error: any) {
-            if (error.response.status = 404) {
+            if (error.response.status == 404) {
                 return 0;
-            };
+            }
         }
     }
 

@@ -2,8 +2,6 @@
 
 namespace App\Models;
 
-use App\Casts\SigningKeyCast;
-use App\Casts\VerificationKeyCast;
 use Illuminate\Database\Eloquent\Concerns\HasTimestamps;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Spatie\LaravelCipherSweet\Contracts\CipherSweetEncrypted;
@@ -22,6 +20,10 @@ class Wallet extends Model implements CipherSweetEncrypted
         //@todo causes error. Note needed for now.
         // 'signing_key' => SigningKeyCast::class,
         // 'verification_key' => VerificationKeyCast::class
+    ];
+
+    protected $fillable = [
+        'passphrase'
     ];
 
     /**

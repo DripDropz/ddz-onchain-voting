@@ -69,7 +69,7 @@ Route::get('/epochs/latest/parameters', function (Request $request, BlockfrostRe
 Route::post('/parse/csv', [SnapshotImportController::class, 'parseCSV']);
 Route::get('/parsed/csv/{filename}', [SnapshotImportController::class, 'getParsedCSV']);
 Route::post('/parse/csv/cancel', [SnapshotImportController::class, 'cancelParsedCSV']);
-Route::post('/upload/csv/{snapshot}', [SnapshotImportController::class, 'uploadCsv']);
+Route::post('/upload/csv/{snapshot}', [SnapshotImportController::class, 'uploadCSV']);
 
 Route::get('/snapshot', [SnapshotController::class, 'searchSnapshot'])->name('searchSnapshot');
 Route::post('/update-position', [BallotController::class, 'updatePosition'])->name('update.position');

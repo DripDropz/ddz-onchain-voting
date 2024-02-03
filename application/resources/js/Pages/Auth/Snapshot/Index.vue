@@ -1,42 +1,47 @@
 <template>
-    <AuthenticatedLayout title="Dashboard"
-               :crumbs="crumbs">
-                       
-                        <section class="py-12">
+    <AuthenticatedLayout title="Snapshots" :crumbs="crumbs">
+        <template v-slot:header>
+            <h2 class="font-semibold text-lg xl:text-xl text-gray-800 dark:text-gray-200 leading-tight mb-4">
+                Snapshots
+            </h2>
+        </template>
+        <section class="py-12">
             <div class="max-w-7xl mx-auto sm:px-6 lg:px-8">
                 <div class="sm:rounded-lg">
-                    <h2 class="font-semibold text-lg xl:text-xl text-gray-800 dark:text-gray-200 leading-tight mb-4">
-                        Ballots
-                    </h2>
-                    <BallotList :ballots="ballotsData"/>
-                    <div v-if="ballotsPagination" class="flex flex-row items-center justify-between w-full py-4">
-                            <div class="border-2 border-sky-600">
-                                <p class="p-4 text-sm text-sky-600 dark:text-gray-300">
-                                    {{ `Showing ${ballotsPagination?.from} to ${(ballotsPagination?.to < ballotsPagination?.total) ? ballotsPagination?.to : ballotsPagination?.total} of ${ballotsPagination?.total} results` }}
-                                </p>
-                            </div>
-                            <Paginator :pagination="ballotsPagination"
-                                @paginated="(payload: number) => currPage = payload"
-                                @perPageUpdated="(payload: number) => perPage = payload">
-                            </Paginator>
-                        </div>
-                    
+                    <Link :href="route('admin.snapshots.create')">Create New Snapshot</Link>
                 </div>
             </div>
+<!--            <div class="max-w-7xl mx-auto sm:px-6 lg:px-8">
+                <div class="sm:rounded-lg">
+                    <h2 class="font-semibold text-lg xl:text-xl text-gray-800 dark:text-gray-200 leading-tight mb-4">
+                        Ballots </h2>
+                    <BallotList :ballots="ballotsData"/>
+                    <div v-if="ballotsPagination" class="flex flex-row items-center justify-between w-full py-4">
+                        <div class="border-2 border-sky-600">
+                            <p class="p-4 text-sm text-sky-600 dark:text-gray-300">
+                                {{
+                                    `Showing ${ballotsPagination?.from} to ${(ballotsPagination?.to < ballotsPagination?.total) ? ballotsPagination?.to : ballotsPagination?.total} of ${ballotsPagination?.total} results`
+                                }}
+                            </p>
+                        </div>
+                        <Paginator :pagination="ballotsPagination" @paginated="(payload: number) => currPage = payload"
+                                   @perPageUpdated="(payload: number) => perPage = payload"></Paginator>
+                    </div>
+                </div>
+            </div>-->
         </section>
     </AuthenticatedLayout>
 </template>
-
-
 <script setup lang="ts">
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout.vue';
-import BallotList from "@/Pages/Auth/Ballot/Partials/BallotList.vue"
-import Paginator from '@/shared/components/Paginator.vue';
-import { useBallotStore } from '@/stores/ballot-store';
-import BallotsQuery from '@/types/ballots-query';
-import { VARIABLES } from '@/types/variables'
-import { ref, watch } from 'vue';
-import { storeToRefs } from 'pinia';
+import { Link } from "@inertiajs/vue3";
+// import BallotList from "@/Pages/Auth/Ballot/Partials/BallotList.vue"
+// import Paginator from '@/shared/components/Paginator.vue';
+// import { useBallotStore } from '@/stores/ballot-store';
+// import BallotsQuery from '@/types/ballots-query';
+// import { VARIABLES } from '@/types/variables'
+// import { ref, watch } from 'vue';
+// import { storeToRefs } from 'pinia';
 
 
 const props = defineProps<{
@@ -44,7 +49,7 @@ const props = defineProps<{
     crumbs: [];
 }>();
 
-let ballotStore = useBallotStore();
+/*let ballotStore = useBallotStore();
 ballotStore.loadBallots();
 let { ballotsQueryData, ballotsData, ballotsPagination} = storeToRefs(ballotStore);
 
@@ -80,8 +85,6 @@ function getQueryData() {
 
 watch([ballotsQueryDataRef], () => {
     ballotsQueryData.value = ballotsQueryDataRef.value;
-})
-
-
+})*/
 </script>
 

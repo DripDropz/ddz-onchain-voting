@@ -98,6 +98,7 @@ import humanNumber from "@/utils/human-number";
 import BallotData = App.DataTransferObjects.BallotData;
 import BallotStatusBadge from "@/Pages/Auth/Ballot/Partials/BallotStatusBadge.vue";
 import AlertService from "@/shared/Services/alert-service";
+import {EllipsisHorizontalIcon} from "@heroicons/vue/24/solid"
 
 const props = defineProps<{
     ballot: BallotData;

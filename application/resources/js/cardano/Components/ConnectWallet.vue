@@ -69,7 +69,7 @@ import { storeToRefs } from 'pinia';
 import { onClickOutside } from '@vueuse/core';
 import { XMarkIcon } from "@heroicons/vue/20/solid";
 import AlertService from '@/shared/Services/alert-service';
-import PrimaryButton from '@/Components/PrimaryButton.vue';
+// import PrimaryButton from '@/Components/PrimaryButton.vue';
 
 
 const props = withDefaults(
@@ -107,7 +107,8 @@ async function enableWallet(wallet: string) {
         walletStore.saveWallet(walletData);
         walletLoading.value = false;
     } catch (e) {
-        console.log(e);
+        walletLoading.value = false;
+        walletStore.disconnect();
     }
 }
 

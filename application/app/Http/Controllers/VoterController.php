@@ -22,8 +22,8 @@ class VoterController extends Controller
         $user = User::where('voter_id', $voterId)->firstOrFail();
 
         return VotingPower::where('user_id', $user->id)
-            ->where('snapshot_id', $ballot->snapshot?->id)
-            ->firstOrFail()?->voting_power / 1000000;
+                                   ->where('snapshot_id', $ballot->snapshot?->id)
+                                   ->firstOrFail()?->voting_power / 1000000;
     }
 
     /**

@@ -27,7 +27,7 @@
 <script lang="ts" setup>
 import BallotData = App.DataTransferObjects.BallotData;
 import VoterLayout from "@/Layouts/VoterLayout.vue";
-import BallotSingle from "@/Pages/Ballot/Partials/BallotSingle.vue";
+// import BallotSingle from "@/Pages/Ballot/Partials/BallotSingle.vue";
 import OpenBallots from "@/Pages/Partials/OpenBallots.vue";
 import Line from "@/Pages/Partials/Line.vue";
 import Nav from '../NavCrumbs.vue';

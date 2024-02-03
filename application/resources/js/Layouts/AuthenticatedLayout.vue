@@ -20,7 +20,7 @@ let {isDarkMode} = storeToRefs(configStore);
 <template>
     <div :class="{'dark': isDarkMode }" v-if="!!$page.props?.auth?.user">
         <div class="min-h-screen bg-sky-50 dark:bg-gray-900">
-            <nav class="bg-sky-50 border-b border-gray-100 dark:bg-gray-800 dark:border-gray-700">
+            <nav class="bg-sky-50 border-b border-gray-100 bg-white dark:bg-gray-800 dark:border-gray-700">
                 <!-- Primary Navigation Menu -->
                 <div class="px-4 mx-auto max-w-7xl sm:px-6 lg:px-8">
                     <div class="flex justify-between h-16">
@@ -138,7 +138,7 @@ let {isDarkMode} = storeToRefs(configStore);
 
             <!-- Page Heading -->
             <header class="bg-white shadow dark:bg-gray-800" v-if="$slots.header">
-                <div class="px-4 mx-auto max-w-7xl sm:px-6 lg:px-8">
+                <div class="px-4 mx-auto max-w-7xl sm:px-6 lg:px-8 py-4">
                     <slot name="header"/>
                 </div>
             </header>

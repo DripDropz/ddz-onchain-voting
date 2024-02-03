@@ -5,16 +5,16 @@
                 <ul class="flex items-center gap-3 flex-nowrap">
                     <li class="w-auto ocv-link">
                         <Link :href="route('home')">
-                        <img :src="config.logo ?? voteAppLogo" alt="Open Chainvote App Logo" class="w-10 h-10">
+                        <img :src="configStore.isDarkMode ? darkLogo : lightLogo" alt="Open Chainvote App Logo" class="h-10">
                         </Link>
                     </li>
-                    <li class="w-auto ocv-link">
+<!--                    <li class="w-auto ocv-link">
                         <Link :href="route('home')">
                         <h1
                             class="font-bold tracking-tight sm:text-xl xl:text-3xl font-display text-slate-900 dark:text-slate-200">
                             Open ChainVote</h1>
                         </Link>
-                    </li>
+                    </li>-->
                     <li
                         class="items-end justify-between hidden gap-8 p-1 ml-8 text-lg lg:flex font-display text-slate-900 dark:text-slate-200">
                         <Link v-for="option in menuOptions" :href="option.href" :class="[
@@ -87,7 +87,9 @@ import { useConfigStore } from '@/stores/config-store';
 import { storeToRefs } from 'pinia';
 import { ref } from 'vue';
 import { onClickOutside } from '@vueuse/core';
-import voteAppLogo from '../../../images/openchainvote.png';
+import lightLogo from "@/images/logo-light.svg";
+import darkLogo from "@/images/logo-dark.svg";
+// import voteAppLogo from '../../../images/openchainvote.png';
 
 const user = usePage().props.auth.user;
 const walletStore = useWalletStore();
@@ -106,8 +108,8 @@ const currentUri =  usePage().props.ziggy.uri;
 let showMenu = ref(false);
 const menuOptions = [
     { name: 'Ballots', href: route('ballots.index'), uri: '/ballots' },
-    { name: 'Petitions', href: route('petitions.index'), uri: '/petitions' },
-    { name: 'Polls', href: route('polls.index'), uri: '/polls' },
+    // { name: 'Petitions', href: route('petitions.index'), uri: '/petitions' },
+    // { name: 'Polls', href: route('polls.index'), uri: '/polls' },
 ];
 
 function logout() {
