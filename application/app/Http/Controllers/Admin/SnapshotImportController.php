@@ -47,7 +47,7 @@ class SnapshotImportController extends Controller
     public function getParsedCSV($sampleCount, $filePath)
     {
         // Download the file
-        $tempLocation = storage_path('temp/' . basename($filePath));
+        $tempLocation = '/tmp/' . basename($filePath);
         file_put_contents($tempLocation, Storage::get($filePath));
 
         // Read sample rows
