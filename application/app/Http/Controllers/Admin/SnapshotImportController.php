@@ -89,7 +89,6 @@ class SnapshotImportController extends Controller
 
         $fileName = $request->input('filename');
         $filePath = "voting_powers/{$fileName}";
-        $storagePath = Storage::path($filePath);
 
         // save snapshot's metadata about file
         $this->updateSnapshotModel($snapshot, $filePath, $fileName);
