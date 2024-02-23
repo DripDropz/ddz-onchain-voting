@@ -4,19 +4,15 @@ namespace App\Jobs;
 
 use App\Models\Snapshot;
 use Illuminate\Bus\Queueable;
-use Illuminate\Support\Facades\Log;
-use Illuminate\Support\Facades\File;
 use Illuminate\Queue\SerializesModels;
-use Illuminate\Support\LazyCollection;
 use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\LazyCollection;
 use Illuminate\Queue\InteractsWithQueue;
 use App\Events\votingPowersImportedEvent;
-use App\Jobs\CreateVotingPowerSnapshotJob;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Bus\Dispatchable;
-use Illuminate\Contracts\Queue\ShouldBeUnique;
 
-class SyncVotingPowersFIleJob implements ShouldQueue
+class SyncVotingPowersFileJob implements ShouldQueue
 {
     use Dispatchable, InteractsWithQueue, Queueable, SerializesModels;
 
@@ -27,7 +23,7 @@ class SyncVotingPowersFIleJob implements ShouldQueue
      */
     public function __construct(
         protected Snapshot $snapshot,
-        protected $storagePath
+        protected $filePath
     ) {
     }
 
@@ -36,8 +32,11 @@ class SyncVotingPowersFIleJob implements ShouldQueue
      */
     public function handle(): void
     {
-        LazyCollection::make(function () {
-            $handle = fopen($this->storagePath, 'r');
+        $tempLocation = '/tmp/' . basename($this->filePath);
+        file_put_contents($tempLocation, Storage::get($this->filePath));
+
+        LazyCollection::make(static function () use($tempLocation) {
+            $handle = fopen($tempLocation, 'r');
 
             while (($line = fgetcsv($handle, null)) !== false) {
                 yield $line;
@@ -57,7 +56,8 @@ class SyncVotingPowersFIleJob implements ShouldQueue
                 });
             });
 
-        File::delete($this->storagePath);
+        Storage::delete($this->filePath);
+
         event(new votingPowersImportedEvent($this->snapshot));
     }
 }

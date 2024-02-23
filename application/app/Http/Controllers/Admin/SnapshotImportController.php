@@ -4,7 +4,7 @@ namespace App\Http\Controllers\Admin;
 
 use App\Enums\ModelStatusEnum;
 use App\Http\Controllers\Controller;
-use App\Jobs\SyncVotingPowersFIleJob;
+use App\Jobs\SyncVotingPowersFileJob;
 use App\Models\Snapshot;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\File;
@@ -95,9 +95,9 @@ class SnapshotImportController extends Controller
         $this->updateSnapshotModel($snapshot, $filePath, $fileName);
 
         // Dispatch job to process the snapshot csv file
-        SyncVotingPowersFIleJob::dispatch(
+        SyncVotingPowersFileJob::dispatch(
             $snapshot,
-            $storagePath
+            $filePath
         );
 
         return response()->json([
