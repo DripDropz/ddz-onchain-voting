@@ -69,8 +69,15 @@ class SnapshotImportController extends Controller
                 ];
             });
 
+        $total_uploaded = -1;
+        $handle = fopen($path, 'r');
+        while (($line = fgetcsv($handle, null)) !== false) {
+            $total_uploaded++;
+        }
+        fclose($handle);
+
         return response()->json([
-            'total_uploaded' => count(file($path)) - 1,
+            'total_uploaded' => $total_uploaded,
             'sample_data' => new Fluent($parsedSample)
         ]);
     }
