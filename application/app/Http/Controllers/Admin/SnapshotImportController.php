@@ -9,7 +9,6 @@ use App\Models\Snapshot;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\File;
 use Illuminate\Support\Facades\Gate;
-use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Fluent;
 use Illuminate\Support\LazyCollection;
@@ -21,41 +20,29 @@ class SnapshotImportController extends Controller
      */
     public function parseCSV(Request $request)
     {
-        try {
-            $filename = $request->filename;
-            $directory = 'voting_powers';
-            $pathName = 'voting_powers/' . $filename;
+        $filename = $request->filename;
+        $directory = 'voting_powers';
+        $pathName = 'voting_powers/' . $filename;
 
-            //$pathName already exist then delete already existing record
-            if ($request->input('count') == '0' && Storage::exists($pathName)) {
-                File::delete(Storage::path($pathName));
-            };
+        //$pathName already exist then delete already existing record
+        if ($request->input('count') == '0' && Storage::exists($pathName)) {
+            File::delete(Storage::path($pathName));
+        };
 
-            //create directory if it doesn't exist
-            if (!Storage::exists($directory)) {
-                Storage::makeDirectory($directory);
-            }
-
-            $path = Storage::path($pathName);
-            // temp storage
-
-            Storage::disk('s3')->copy(
-                $request->key,
-                $filename
-            );
-            File::append($path, Storage::disk('s3')->get($filename));
-
-            // $path = Storage::path($pathName);
-            return $this->getParsedCSV(10, $filename);
-        } catch (\Throwable $exception) {
-            Log::error('Failed to parse CSV', [
-                'error' => $exception,
-                'request' => $request->toArray(),
-            ]);
-            throw $exception;
+        //create directory if it doesn't exist
+        if (!Storage::exists($directory)) {
+            Storage::makeDirectory($directory);
         }
-    }
 
+        // Persist the temp file into permanent location
+        Storage::disk('s3')->copy(
+            $request->key,
+            $pathName
+        );
+
+        // $path = Storage::path($pathName);
+        return $this->getParsedCSV(10, $filename);
+    }
 
     public function getParsedCSV($sampleCount, $filename)
     {
