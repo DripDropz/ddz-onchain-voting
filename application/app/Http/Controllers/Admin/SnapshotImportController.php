@@ -20,13 +20,13 @@ class SnapshotImportController extends Controller
      */
     public function parseCSV(Request $request)
     {
-        $filename = $request->filename;
+        // Init
         $directory = 'voting_powers';
-        $pathName = 'voting_powers/' . $filename;
+        $filePath = "{$directory}/{$request->filename}";
 
         //$pathName already exist then delete already existing record
-        if ($request->input('count') == '0' && Storage::exists($pathName)) {
-            File::delete(Storage::path($pathName));
+        if ($request->input('count') == '0' && Storage::exists($filePath)) {
+            File::delete(Storage::path($filePath));
         };
 
         //create directory if it doesn't exist
@@ -37,21 +37,22 @@ class SnapshotImportController extends Controller
         // Persist the temp file into permanent location
         Storage::disk('s3')->copy(
             $request->key,
-            $pathName
+            $filePath
         );
 
         // $path = Storage::path($pathName);
-        return $this->getParsedCSV(10, $filename);
+        return $this->getParsedCSV(10, $filePath);
     }
 
-    public function getParsedCSV($sampleCount, $filename)
+    public function getParsedCSV($sampleCount, $filePath)
     {
-        // $sampleCount = $request->input('count', 10);
-        $pathName = "voting_powers/" . $filename;
-        $path = Storage::path($pathName);
+        // Download the file
+        $tempLocation = storage_path('temp/' . basename($filePath));
+        file_put_contents($tempLocation, Storage::get($filePath));
 
-        $parsedSample = LazyCollection::make(function () use ($path, $sampleCount) {
-            $handle = fopen($path, 'r');
+        // Read sample rows
+        $parsedSample = LazyCollection::make(static function () use ($tempLocation, $sampleCount) {
+            $handle = fopen($tempLocation, 'r');
 
             $count = 0;
             while ((($line = fgetcsv($handle, null)) !== false) && $count <= $sampleCount) {
@@ -62,22 +63,16 @@ class SnapshotImportController extends Controller
             fclose($handle);
         })
             ->skip(1)
-            ->map(function ($row) {
+            ->map(static function ($row) {
                 return [
                     'voter_id' => $row[0],
                     'voting_power' => $row[1],
                 ];
             });
 
-        $total_uploaded = -1;
-        $handle = fopen($path, 'r');
-        while (($line = fgetcsv($handle, null)) !== false) {
-            $total_uploaded++;
-        }
-        fclose($handle);
-
+        // Return results
         return response()->json([
-            'total_uploaded' => $total_uploaded,
+            'total_uploaded' => count(file($tempLocation)) - 1,
             'sample_data' => new Fluent($parsedSample)
         ]);
     }
