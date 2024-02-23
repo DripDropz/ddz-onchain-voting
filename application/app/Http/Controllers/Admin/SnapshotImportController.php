@@ -47,8 +47,7 @@ class SnapshotImportController extends Controller
     public function getParsedCSV($sampleCount, $filePath)
     {
         // Download the file
-        $tempLocation = '/tmp/' . basename($filePath);
-        file_put_contents($tempLocation, Storage::get($filePath));
+        $tempLocation = $this->downloadSnapshotCSVToTempLocation($filePath);
 
         // Read sample rows
         $parsedSample = LazyCollection::make(static function () use ($tempLocation, $sampleCount) {
@@ -92,8 +91,10 @@ class SnapshotImportController extends Controller
         $filePath = "voting_powers/{$fileName}";
         $storagePath = Storage::path($filePath);
 
-        //save snapshot's metadata about fil
-        $this->updateSnapshotModel($snapshot, $storagePath, $fileName);
+        // save snapshot's metadata about file
+        $this->updateSnapshotModel($snapshot, $filePath, $fileName);
+
+        // Dispatch job to process the snapshot csv file
         SyncVotingPowersFIleJob::dispatch(
             $snapshot,
             $storagePath
@@ -104,29 +105,22 @@ class SnapshotImportController extends Controller
         ]);
     }
 
-    protected function updateSnapshotModel(Snapshot $snapshot, $storagePath, $fileName)
+    protected function updateSnapshotModel(Snapshot $snapshot, $filePath, $fileName)
     {
+        $tempLocation = $this->downloadSnapshotCSVToTempLocation($filePath);
         $snap = Snapshot::byHash($snapshot->hash);
         $snap->status = ModelStatusEnum::PENDING->value;
         $snap->metadata =  [
             'snapshot_file' => $fileName,
-            'row_count' => count(file($storagePath)) - 1
+            'row_count' => count(file($tempLocation)) - 1,
         ];
         $snap->save();
     }
 
-    protected function getFirstLine($filePath)
+    private function downloadSnapshotCSVToTempLocation(string $filePath): string
     {
-        $lines = $this->getFileLines($filePath);
-
-        return str_getcsv($lines[0]);
-    }
-
-    protected function getFileLines($filePath)
-    {
-        $file = Storage::get($filePath);
-        $lines = explode("\n", $file);
-
-        return $lines;
+        $tempLocation = '/tmp/' . basename($filePath);
+        file_put_contents($tempLocation, Storage::get($filePath));
+        return $tempLocation;
     }
 }
