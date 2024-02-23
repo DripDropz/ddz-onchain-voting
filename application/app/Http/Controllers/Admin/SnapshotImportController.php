@@ -4,7 +4,7 @@ namespace App\Http\Controllers\Admin;
 
 use App\Enums\ModelStatusEnum;
 use App\Http\Controllers\Controller;
-use App\Jobs\SyncVotingPowersFIleJob;
+use App\Jobs\SyncVotingPowersFileJob;
 use App\Models\Snapshot;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\File;
@@ -20,13 +20,13 @@ class SnapshotImportController extends Controller
      */
     public function parseCSV(Request $request)
     {
-        $filename = $request->filename;
+        // Init
         $directory = 'voting_powers';
-        $pathName = 'voting_powers/' . $filename;
+        $filePath = "{$directory}/{$request->filename}";
 
         //$pathName already exist then delete already existing record
-        if ($request->input('count') == '0' && Storage::exists($pathName)) {
-            File::delete(Storage::path($pathName));
+        if ($request->input('count') == '0' && Storage::exists($filePath)) {
+            File::delete(Storage::path($filePath));
         };
 
         //create directory if it doesn't exist
@@ -34,28 +34,24 @@ class SnapshotImportController extends Controller
             Storage::makeDirectory($directory);
         }
 
-        $path = Storage::path($pathName);
-        // temp storage
-
+        // Persist the temp file into permanent location
         Storage::disk('s3')->copy(
             $request->key,
-            $filename
+            $filePath
         );
-        File::append($path, Storage::disk('s3')->get($filename));
 
         // $path = Storage::path($pathName);
-        return $this->getParsedCSV(10,$filename);
+        return $this->getParsedCSV(10, $filePath);
     }
 
-
-    public function getParsedCSV($sampleCount, $filename)
+    public function getParsedCSV($sampleCount, $filePath)
     {
-        // $sampleCount = $request->input('count', 10);
-        $pathName = "voting_powers/" . $filename;
-        $path = Storage::path($pathName);
+        // Download the file
+        $tempLocation = $this->downloadSnapshotCSVToTempLocation($filePath);
 
-        $parsedSample = LazyCollection::make(function () use ($path, $sampleCount) {
-            $handle = fopen($path, 'r');
+        // Read sample rows
+        $parsedSample = LazyCollection::make(static function () use ($tempLocation, $sampleCount) {
+            $handle = fopen($tempLocation, 'r');
 
             $count = 0;
             while ((($line = fgetcsv($handle, null)) !== false) && $count <= $sampleCount) {
@@ -66,15 +62,16 @@ class SnapshotImportController extends Controller
             fclose($handle);
         })
             ->skip(1)
-            ->map(function ($row) {
+            ->map(static function ($row) {
                 return [
                     'voter_id' => $row[0],
                     'voting_power' => $row[1],
                 ];
             });
 
+        // Return results
         return response()->json([
-            'total_uploaded' => count(file($path)) - 1,
+            'total_uploaded' => count(file($tempLocation)) - 1,
             'sample_data' => new Fluent($parsedSample)
         ]);
     }
@@ -92,13 +89,14 @@ class SnapshotImportController extends Controller
 
         $fileName = $request->input('filename');
         $filePath = "voting_powers/{$fileName}";
-        $storagePath = Storage::path($filePath);
 
-        //save snapshot's metadata about fil
-        $this->updateSnapshotModel($snapshot, $storagePath, $fileName);
-        SyncVotingPowersFIleJob::dispatch(
+        // save snapshot's metadata about file
+        $this->updateSnapshotModel($snapshot, $filePath, $fileName);
+
+        // Dispatch job to process the snapshot csv file
+        SyncVotingPowersFileJob::dispatch(
             $snapshot,
-            $storagePath
+            $filePath
         );
 
         return response()->json([
@@ -106,29 +104,22 @@ class SnapshotImportController extends Controller
         ]);
     }
 
-    protected function updateSnapshotModel(Snapshot $snapshot, $storagePath, $fileName)
+    protected function updateSnapshotModel(Snapshot $snapshot, $filePath, $fileName)
     {
+        $tempLocation = $this->downloadSnapshotCSVToTempLocation($filePath);
         $snap = Snapshot::byHash($snapshot->hash);
         $snap->status = ModelStatusEnum::PENDING->value;
         $snap->metadata =  [
             'snapshot_file' => $fileName,
-            'row_count' => count(file($storagePath)) - 1
+            'row_count' => count(file($tempLocation)) - 1,
         ];
         $snap->save();
     }
 
-    protected function getFirstLine($filePath)
+    private function downloadSnapshotCSVToTempLocation(string $filePath): string
     {
-        $lines = $this->getFileLines($filePath);
-
-        return str_getcsv($lines[0]);
-    }
-
-    protected function getFileLines($filePath)
-    {
-        $file = Storage::get($filePath);
-        $lines = explode("\n", $file);
-
-        return $lines;
+        $tempLocation = '/tmp/' . basename($filePath);
+        file_put_contents($tempLocation, Storage::get($filePath));
+        return $tempLocation;
     }
 }
